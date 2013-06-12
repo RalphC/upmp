@@ -58,13 +58,13 @@ public class MultipartUrlConfigGui extends UrlConfigGui {
     @Override
     public void modifyTestElement(TestElement sampler) {
         super.modifyTestElement(sampler);
-        filesPanel.modifyTestElement(sampler);
+        //filesPanel.modifyTestElement(sampler);
     }
 
     @Override
     public void configure(TestElement el) {
         super.configure(el);
-        filesPanel.configure(el);
+        //filesPanel.configure(el);
     }
 
     private void init() {// called from ctor, so must not be overridable
@@ -83,7 +83,7 @@ public class MultipartUrlConfigGui extends UrlConfigGui {
 
         webRequestPanel.add(northPanel, BorderLayout.NORTH);
         webRequestPanel.add(getParameterPanel(), BorderLayout.CENTER);
-        webRequestPanel.add(getHTTPFileArgsPanel(), BorderLayout.SOUTH);
+        //webRequestPanel.add(getHTTPFileArgsPanel(), BorderLayout.SOUTH);
 
         this.add(getWebServerTimeoutPanel(), BorderLayout.NORTH);
         this.add(webRequestPanel, BorderLayout.CENTER);
@@ -101,6 +101,6 @@ public class MultipartUrlConfigGui extends UrlConfigGui {
     @Override
     public void clear() {
         super.clear();
-        filesPanel.clear();
+        //filesPanel.clear();
     }
 }
