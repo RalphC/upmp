@@ -71,7 +71,7 @@ public class UPMPSamplerFactory {
             impl = DEFAULT_CLASSNAME;
         }
         
-        return new UPMPHC4Impl(base);
+        return new UPMPInsImpl(base);
 //        if (IMPL_JAVA.equals(impl) || HTTP_SAMPLER_JAVA.equals(impl)) {
 //            return new HTTPJavaImpl(base);
 //        } else if (IMPL_HTTP_CLIENT3_1.equals(impl) || HTTP_SAMPLER_APACHE.equals(impl)) {

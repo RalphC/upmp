@@ -166,9 +166,9 @@ public class UrlConfigGui extends JPanel implements ChangeListener {
         protocol.setText(""); // $NON-NLS-1$
         contentEncoding.setText(""); // $NON-NLS-1$
         argsPanel.clear();
-        if(showRawBodyPane) {
-            postBodyContent.setText("");// $NON-NLS-1$
-        }
+//        if(showRawBodyPane) {
+//            postBodyContent.setText("");// $NON-NLS-1$
+//        }
         postContentTabbedPane.setSelectedIndex(TAB_PARAMETERS, false);
     }
 
@@ -596,11 +596,11 @@ public class UrlConfigGui extends JPanel implements ChangeListener {
     protected JTabbedPane getParameterPanel() {
         postContentTabbedPane = new ValidationTabbedPane();
         argsPanel = new UPMPArgumentsPanel();
-        postContentTabbedPane.add(JMeterUtils.getResString("post_as_parameters"), argsPanel);// $NON-NLS-1$
-        if(showRawBodyPane) {
-            postBodyContent = new JLabeledTextArea(JMeterUtils.getResString("post_body_raw"));// $NON-NLS-1$
-            postContentTabbedPane.add(JMeterUtils.getResString("post_body"), postBodyContent);// $NON-NLS-1$
-        }
+        postContentTabbedPane.add(UPMPConstant.post_as_parameters, argsPanel);// $NON-NLS-1$
+//        if(showRawBodyPane) {
+//            postBodyContent = new JLabeledTextArea(JMeterUtils.getResString("post_body_raw"));// $NON-NLS-1$
+//            postContentTabbedPane.add(JMeterUtils.getResString("post_body"), postBodyContent);// $NON-NLS-1$
+//        }
         return postContentTabbedPane;
     }
 
