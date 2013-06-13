@@ -37,6 +37,7 @@ import org.apache.jorphan.gui.JLabeledTextField;
 
 import com.unionpay.upmp.jmeterplugin.UPMPSamplerBase;
 import com.unionpay.upmp.jmeterplugin.UPMPSamplerProxy;
+import com.unionpay.upmp.util.UPMPConstant;
 
 //For unit tests, @see TestHttpTestSampleGui
 

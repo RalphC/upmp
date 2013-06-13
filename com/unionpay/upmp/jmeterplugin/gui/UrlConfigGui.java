@@ -52,6 +52,7 @@ import org.apache.jorphan.gui.JLabeledTextArea;
 
 import com.unionpay.upmp.jmeterplugin.UPMPSamplerBase;
 import com.unionpay.upmp.jmeterplugin.UPMPSamplerFactory;
+import com.unionpay.upmp.util.UPMPConstant;
 
 /**
  * Basic URL / HTTP Request configuration:

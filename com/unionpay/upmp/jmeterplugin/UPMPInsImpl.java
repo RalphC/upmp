@@ -94,12 +94,12 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 
-import com.unionpay.upmp.jmeterplugin.gui.UPMPConstant;
 import com.unionpay.upmp.sdk.conf.UpmpConfig;
 import com.unionpay.upmp.sdk.service.UpmpService;
 import com.unionpay.upmp.sdk.util.UpmpCore;
 import com.unionpay.upmp.util.BytesUtil;
 import com.unionpay.upmp.util.RSAUtil;
+import com.unionpay.upmp.util.UPMPConstant;
 
 public class UPMPInsImpl extends UPMPHCAbstractImpl {
 
