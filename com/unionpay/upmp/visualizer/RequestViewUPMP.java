@@ -23,7 +23,6 @@ import java.awt.Component;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -49,6 +48,7 @@ import org.apache.jorphan.reflect.Functor;
 import org.apache.log.Logger;
 
 import com.unionpay.upmp.jmeterplugin.UPMPSampleResult;
+import com.unionpay.upmp.sdk.util.UpmpCore;
 import com.unionpay.upmp.util.UPMPConstant;
 
 /**
@@ -169,7 +169,7 @@ public class RequestViewUPMP implements RequestView {
             // Display with same order HTTP protocol
             requestModel.addRow(new RowResult(
                     JMeterUtils.getResString("view_results_table_request_http_method"), //$NON-NLS-1$
-                    sampleResult.getHTTPMethod()));
+                    sampleResult.getUPMPMethod()));
 
             URL hUrl = sampleResult.getURL();
             if (hUrl != null){ // can be null - e.g. if URL was invalid
@@ -198,10 +198,15 @@ public class RequestViewUPMP implements RequestView {
                 }
                 queryGet = RequestViewUPMP.decodeQuery(queryGet);
                 if (queryGet != null) {
-                    Set<Entry<String, String>> keys = RequestViewUPMP.getQueryMap(queryGet).entrySet();
-                    for (Entry<String, String> entry : keys) {
-                        paramsModel.addRow(new RowResult(entry.getKey(),entry.getValue()));
-                    }
+                	Set<Entry<String, String>> keys;
+					try {
+						keys = UpmpCore.parseQString(queryGet).entrySet();
+	                    for (Entry<String, String> entry : keys) {
+	                        paramsModel.addRow(new RowResult(entry.getKey(),entry.getValue()));
+	                    }
+					} catch (UnsupportedEncodingException e) {
+						log.warn("Error parsing response string, unsupported encoding");
+					}
                 }
             }
             // Display cookie in headers table (same location on http protocol)
@@ -223,42 +228,6 @@ public class RequestViewUPMP implements RequestView {
             requestModel.addRow(new RowResult("", //$NON-NLS-1$
                     JMeterUtils.getResString("view_results_table_request_http_nohttp"))); //$NON-NLS-1$
         }
-    }
-
-    /**
-     * @param query
-     * @return Map params and Svalue
-     */
-    //TODO: move to utils class (JMeterUtils?)
-    public static Map<String, String> getQueryMap(String query) {
-
-        Map<String, String> map = new HashMap<String, String>();
-        if (query.trim().startsWith("<?")) { // $NON-NLS-1$
-            // SOAP request (generally)
-            map.put(" ", query); //blank name // $NON-NLS-1$
-            return map;
-        }
-        String[] params = query.split(PARAM_CONCATENATE);
-        for (String param : params) {
-            String[] paramSplit = param.split("="); // $NON-NLS-1$
-            if (paramSplit.length > 2 ) {// detected invalid syntax (Bug 52491)
-                // Return as for SOAP above
-                map.clear();
-                map.put(" ", query); //blank name // $NON-NLS-1$
-                return map;
-            }
-            String name = null;
-            if (paramSplit.length > 0) {
-                name = paramSplit[0];
-            }
-            String value = ""; // empty init // $NON-NLS-1$
-            if (paramSplit.length > 1) {
-                // We use substring to keep = sign (Bug 54055), we are sure = is present
-                value = param.substring(param.indexOf("=")+1); // $NON-NLS-1$
-            }
-            map.put(name, value);
-        }
-        return map;
     }
 
     /**

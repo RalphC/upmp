@@ -43,14 +43,15 @@ import org.apache.jmeter.protocol.http.parser.HTMLParser;
 
 import com.unionpay.upmp.jmeterplugin.UPMPSampleResult;
 import com.unionpay.upmp.jmeterplugin.UPMPSamplerBase;
+import com.unionpay.upmp.util.HTTPArgument;
+import com.unionpay.upmp.util.HTTPConstantsInterface;
+import com.unionpay.upmp.util.HTTPFileArg;
+import com.unionpay.upmp.util.HTTPFileArgs;
+import com.unionpay.upmp.util.UPMPConstant;
 
 import org.apache.jmeter.protocol.http.util.ConversionUtils;
 import org.apache.jmeter.protocol.http.util.EncoderCache;
-import org.apache.jmeter.protocol.http.util.HTTPArgument;
-import org.apache.jmeter.protocol.http.util.HTTPConstants;
-import org.apache.jmeter.protocol.http.util.HTTPConstantsInterface;
-import org.apache.jmeter.protocol.http.util.HTTPFileArg;
-import org.apache.jmeter.protocol.http.util.HTTPFileArgs;
+
 import org.apache.jmeter.samplers.AbstractSampler;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
@@ -139,7 +140,7 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
 
     static final String PROTOCOL_FILE = "file"; // $NON-NLS-1$
 
-    private static final String DEFAULT_PROTOCOL = HTTPConstants.PROTOCOL_HTTP;
+    private static final String DEFAULT_PROTOCOL = UPMPConstant.PROTOCOL_HTTP;
 
     public static final String URL = "UPMPSampler.URL"; // $NON-NLS-1$
 
@@ -175,17 +176,17 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
     public static final int CONCURRENT_POOL_SIZE = 4; // Default concurrent pool size for download embedded resources
     
     
-    public static final String DEFAULT_METHOD = HTTPConstants.GET; // $NON-NLS-1$
+    public static final String DEFAULT_METHOD = UPMPConstant.GET; // $NON-NLS-1$
     // Supported methods:
     private static final String [] METHODS = {
         DEFAULT_METHOD, // i.e. GET
-        HTTPConstants.POST,
-        HTTPConstants.HEAD,
-        HTTPConstants.PUT,
-        HTTPConstants.OPTIONS,
-        HTTPConstants.TRACE,
-        HTTPConstants.DELETE,
-        HTTPConstants.PATCH,
+        UPMPConstant.POST,
+        UPMPConstant.HEAD,
+        UPMPConstant.PUT,
+        UPMPConstant.OPTIONS,
+        UPMPConstant.TRACE,
+        UPMPConstant.DELETE,
+        UPMPConstant.PATCH,
         };
 
     private static final List<String> METHODLIST = Collections.unmodifiableList(Arrays.asList(METHODS));
@@ -344,7 +345,7 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
         // We use multipart if we have been told so, or files are present
         // and the files should not be send as the post body
         HTTPFileArg[] files = getHTTPFiles();
-        if(HTTPConstants.POST.equals(getMethod()) && (getDoMultipartPost() || (files.length > 0 && !getSendFileAsPostBody()))) {
+        if(UPMPConstant.POST.equals(getMethod()) && (getDoMultipartPost() || (files.length > 0 && !getSendFileAsPostBody()))) {
             return true;
         }
         return false;
@@ -391,7 +392,7 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
      */
     public void setPath(String path, String contentEncoding) {
         boolean fullUrl = path.startsWith(HTTP_PREFIX) || path.startsWith(HTTPS_PREFIX); 
-        if (!fullUrl && (HTTPConstants.GET.equals(getMethod()) || HTTPConstants.DELETE.equals(getMethod()))) {
+        if (!fullUrl && (UPMPConstant.GET.equals(getMethod()) || UPMPConstant.DELETE.equals(getMethod()))) {
             int index = path.indexOf(QRY_PFX);
             if (index > -1) {
                 setProperty(PATH, path.substring(0, index));
@@ -618,8 +619,8 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
     public static int getDefaultPort(String protocol,int port){
         if (port==URL_UNSPECIFIED_PORT){
             return
-                protocol.equalsIgnoreCase(HTTPConstants.PROTOCOL_HTTP)  ? HTTPConstants.DEFAULT_HTTP_PORT :
-                protocol.equalsIgnoreCase(HTTPConstants.PROTOCOL_HTTPS) ? HTTPConstants.DEFAULT_HTTPS_PORT :
+                protocol.equalsIgnoreCase(UPMPConstant.PROTOCOL_HTTP)  ? UPMPConstant.DEFAULT_HTTP_PORT :
+                protocol.equalsIgnoreCase(UPMPConstant.PROTOCOL_HTTPS) ? UPMPConstant.DEFAULT_HTTPS_PORT :
                     port;
         }
         return port;
@@ -648,8 +649,8 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
         final int port = getPortIfSpecified();
         final String protocol = getProtocol();
         if (port == UNSPECIFIED_PORT ||
-                (HTTPConstants.PROTOCOL_HTTP.equalsIgnoreCase(protocol) && port == HTTPConstants.DEFAULT_HTTP_PORT) ||
-                (HTTPConstants.PROTOCOL_HTTPS.equalsIgnoreCase(protocol) && port == HTTPConstants.DEFAULT_HTTPS_PORT)) {
+                (UPMPConstant.PROTOCOL_HTTP.equalsIgnoreCase(protocol) && port == UPMPConstant.DEFAULT_HTTP_PORT) ||
+                (UPMPConstant.PROTOCOL_HTTPS.equalsIgnoreCase(protocol) && port == UPMPConstant.DEFAULT_HTTPS_PORT)) {
             return true;
         }
         return false;
@@ -664,14 +665,14 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
         final int port = getPortIfSpecified();
         if (port == UNSPECIFIED_PORT) {
             String prot = getProtocol();
-            if (HTTPConstants.PROTOCOL_HTTPS.equalsIgnoreCase(prot)) {
-                return HTTPConstants.DEFAULT_HTTPS_PORT;
+            if (UPMPConstant.PROTOCOL_HTTPS.equalsIgnoreCase(prot)) {
+                return UPMPConstant.DEFAULT_HTTPS_PORT;
             }
-            if (!HTTPConstants.PROTOCOL_HTTP.equalsIgnoreCase(prot)) {
+            if (!UPMPConstant.PROTOCOL_HTTP.equalsIgnoreCase(prot)) {
                 log.warn("Unexpected protocol: "+prot);
                 // TODO - should this return something else?
             }
-            return HTTPConstants.DEFAULT_HTTP_PORT;
+            return UPMPConstant.DEFAULT_HTTP_PORT;
         }
         return port;
     }
@@ -846,8 +847,8 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
         return res;
     }
 
-    private static final String HTTP_PREFIX = HTTPConstants.PROTOCOL_HTTP+"://"; // $NON-NLS-1$
-    private static final String HTTPS_PREFIX = HTTPConstants.PROTOCOL_HTTPS+"://"; // $NON-NLS-1$
+    private static final String HTTP_PREFIX = UPMPConstant.PROTOCOL_HTTP+"://"; // $NON-NLS-1$
+    private static final String HTTPS_PREFIX = UPMPConstant.PROTOCOL_HTTPS+"://"; // $NON-NLS-1$
 
     // Bug 51939
     private static final boolean SEPARATE_CONTAINER = 
@@ -885,7 +886,7 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
         pathAndQuery.append(path);
 
         // Add the query string if it is a HTTP GET or DELETE request
-        if(HTTPConstants.GET.equals(getMethod()) || HTTPConstants.DELETE.equals(getMethod())) {
+        if(UPMPConstant.GET.equals(getMethod()) || UPMPConstant.DELETE.equals(getMethod())) {
             // Get the query string encoded in specified encoding
             // If no encoding is specified by user, we will get it
             // encoded in UTF-8, which is what the HTTP spec says
@@ -1040,7 +1041,7 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
             StringBuilder stringBuffer = new StringBuilder();
             stringBuffer.append(this.getUrl().toString());
             // Append body if it is a post or put
-            if(HTTPConstants.POST.equals(getMethod()) || HTTPConstants.PUT.equals(getMethod())) {
+            if(UPMPConstant.POST.equals(getMethod()) || UPMPConstant.PUT.equals(getMethod())) {
                 stringBuffer.append("\nQuery Data: ");
                 stringBuffer.append(getQueryString());
             }
@@ -1186,10 +1187,10 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
                         
                         if (isConcurrentDwn()) {
                             // if concurrent download emb. resources, add to a list for async gets later
-                            liste.add(new ASyncSample(url, HTTPConstants.GET, false, frameDepth + 1, getCookieManager(), this));
+                            liste.add(new ASyncSample(url, UPMPConstant.GET, false, frameDepth + 1, getCookieManager(), this));
                         } else {
                             // default: serial download embedded resources
-                        	UPMPSampleResult binRes = sample(url, HTTPConstants.GET, false, frameDepth + 1);
+                        	UPMPSampleResult binRes = sample(url, UPMPConstant.GET, false, frameDepth + 1);
                             res.addSubResult(binRes);
                             setParentSampleSuccess(res, res.isSuccessful() && binRes.isSuccessful());
                         }
@@ -1392,7 +1393,7 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
             // this behaviour.
             location = encodeSpaces(location);
             try {
-                lastRes = sample(ConversionUtils.makeRelativeURL(lastRes.getURL(), location), HTTPConstants.GET, true, frameDepth);
+                lastRes = sample(ConversionUtils.makeRelativeURL(lastRes.getURL(), location), UPMPConstant.GET, true, frameDepth);
             } catch (MalformedURLException e) {
                 errorResult(e, lastRes);
                 // The redirect URL we got was not a valid URL
@@ -1428,7 +1429,7 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
         // because that's what browsers do: they show the final URL of the
         // redirect chain in the location field.
         totalRes.setURL(lastRes.getURL());
-        totalRes.setHTTPMethod(lastRes.getHTTPMethod());
+        totalRes.setUPMPMethod(lastRes.getUPMPMethod());
         totalRes.setQueryString(lastRes.getQueryString());
         totalRes.setRequestHeaders(lastRes.getRequestHeaders());
 
@@ -1576,7 +1577,7 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
     }
 
     public static boolean isSecure(String protocol){
-        return HTTPConstants.PROTOCOL_HTTPS.equalsIgnoreCase(protocol);
+        return UPMPConstant.PROTOCOL_HTTPS.equalsIgnoreCase(protocol);
     }
 
     public static boolean isSecure(URL url){

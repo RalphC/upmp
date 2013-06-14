@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URI;
@@ -12,9 +11,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +25,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -53,18 +49,11 @@ import org.apache.http.client.protocol.ResponseContentEncoding;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.FormBodyPart;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
@@ -82,9 +71,6 @@ import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.protocol.http.sampler.HttpClientDefaultParameters;
 import org.apache.jmeter.protocol.http.util.EncoderCache;
 import org.apache.jmeter.protocol.http.util.HC4TrustAllSSLSocketFactory;
-import org.apache.jmeter.protocol.http.util.HTTPArgument;
-import org.apache.jmeter.protocol.http.util.HTTPConstants;
-import org.apache.jmeter.protocol.http.util.HTTPFileArg;
 import org.apache.jmeter.protocol.http.util.SlowHC4SSLSocketFactory;
 import org.apache.jmeter.protocol.http.util.SlowHC4SocketFactory;
 import org.apache.jmeter.testelement.property.CollectionProperty;
@@ -93,8 +79,11 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 import com.unionpay.upmp.sdk.service.UpmpService;
+import com.unionpay.upmp.util.HTTPArgument;
+import com.unionpay.upmp.util.HTTPFileArg;
+import com.unionpay.upmp.util.UPMPConstant;
 
-public class UPMPHC4Impl extends UPMPHCAbstractImpl {
+public class UPMPHC4Impl extends UPMPAbstractImpl {
 
     private static final Logger log = LoggingManager.getLoggerForClass();
 
@@ -159,7 +148,7 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
         // Set up HTTP scheme override if necessary
         if (CPS_HTTP > 0) {
             log.info("Setting up HTTP SlowProtocol, cps="+CPS_HTTP);
-            SLOW_HTTP = new Scheme(HTTPConstants.PROTOCOL_HTTP, HTTPConstants.DEFAULT_HTTP_PORT, new SlowHC4SocketFactory(CPS_HTTP));
+            SLOW_HTTP = new Scheme(UPMPConstant.PROTOCOL_HTTP, UPMPConstant.DEFAULT_HTTP_PORT, new SlowHC4SocketFactory(CPS_HTTP));
         } else {
             SLOW_HTTP = null;
         }
@@ -169,14 +158,14 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
         if (CPS_HTTPS > 0) {
             log.info("Setting up HTTPS SlowProtocol, cps="+CPS_HTTPS);
             try {
-                https = new Scheme(HTTPConstants.PROTOCOL_HTTPS, HTTPConstants.DEFAULT_HTTPS_PORT, new SlowHC4SSLSocketFactory(CPS_HTTPS));
+                https = new Scheme(UPMPConstant.PROTOCOL_HTTPS, UPMPConstant.DEFAULT_HTTPS_PORT, new SlowHC4SSLSocketFactory(CPS_HTTPS));
             } catch (GeneralSecurityException e) {
                 log.warn("Failed to initialise SLOW_HTTPS scheme, cps="+CPS_HTTPS, e);
             }
         } else {
             log.info("Setting up HTTPS TrustAll scheme");
             try {
-                https = new Scheme(HTTPConstants.PROTOCOL_HTTPS, HTTPConstants.DEFAULT_HTTPS_PORT, new HC4TrustAllSSLSocketFactory());
+                https = new Scheme(UPMPConstant.PROTOCOL_HTTPS, UPMPConstant.DEFAULT_HTTPS_PORT, new HC4TrustAllSSLSocketFactory());
             } catch (GeneralSecurityException e) {
                 log.warn("Failed to initialise HTTPS TrustAll scheme", e);
             }
@@ -202,7 +191,7 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
         res.setMonitor(isMonitor());
 
         res.setSampleLabel(url.toString()); // May be replaced later
-        res.setHTTPMethod(method);
+        res.setUPMPMethod(method);
         res.setURL(url);
 
         HttpClient httpClient = setupClient(url);
@@ -210,21 +199,21 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
         HttpRequestBase httpRequest = null;
         try {
             URI uri = url.toURI();
-            if (method.equals(HTTPConstants.POST)) {
+            if (method.equals(UPMPConstant.POST)) {
                 httpRequest = new HttpPost(uri);
-            } else if (method.equals(HTTPConstants.PUT)) {
+            } else if (method.equals(UPMPConstant.PUT)) {
                 httpRequest = new HttpPut(uri);
-            } else if (method.equals(HTTPConstants.HEAD)) {
+            } else if (method.equals(UPMPConstant.HEAD)) {
                 httpRequest = new HttpHead(uri);
-            } else if (method.equals(HTTPConstants.TRACE)) {
+            } else if (method.equals(UPMPConstant.TRACE)) {
                 httpRequest = new HttpTrace(uri);
-            } else if (method.equals(HTTPConstants.OPTIONS)) {
+            } else if (method.equals(UPMPConstant.OPTIONS)) {
                 httpRequest = new HttpOptions(uri);
-            } else if (method.equals(HTTPConstants.DELETE)) {
+            } else if (method.equals(UPMPConstant.DELETE)) {
                 httpRequest = new HttpDelete(uri);
-            } else if (method.equals(HTTPConstants.GET)) {
+            } else if (method.equals(UPMPConstant.GET)) {
                 httpRequest = new HttpGet(uri);
-            } else if (method.equals(HTTPConstants.PATCH)) {
+            } else if (method.equals(UPMPConstant.PATCH)) {
                 httpRequest = new HttpPatch(uri);
             } else {
                 throw new IllegalArgumentException("Unexpected method: "+method);
@@ -242,7 +231,7 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
         res.sampleStart();
 
         final CacheManager cacheManager = getCacheManager();
-        if (cacheManager != null && HTTPConstants.GET.equalsIgnoreCase(method)) {
+        if (cacheManager != null && UPMPConstant.GET.equalsIgnoreCase(method)) {
            if (cacheManager.inCache(url)) {
                res.sampleEnd();
                res.setResponseNoContent();
@@ -254,10 +243,10 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
         try {
             currentRequest = httpRequest;
             // Handle the various methods
-            if (method.equals(HTTPConstants.POST)) {
+            if (method.equals(UPMPConstant.POST)) {
                 String postBody = sendPostData((HttpPost)httpRequest);
                 res.setQueryString(postBody);
-            } else if (method.equals(HTTPConstants.PUT) || method.equals(HTTPConstants.PATCH)) {
+            } else if (method.equals(UPMPConstant.PUT) || method.equals(UPMPConstant.PATCH)) {
                 String entityBody = sendEntityData(( HttpEntityEnclosingRequestBase)httpRequest);
                 res.setQueryString(entityBody);
             }
@@ -266,7 +255,7 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
             // Needs to be done after execute to pick up all the headers
             res.setRequestHeaders(getConnectionHeaders((HttpRequest) localContext.getAttribute(ExecutionContext.HTTP_REQUEST)));
 
-            Header contentType = httpResponse.getLastHeader(HTTPConstants.HEADER_CONTENT_TYPE);
+            Header contentType = httpResponse.getLastHeader(UPMPConstant.HEADER_CONTENT_TYPE);
             if (contentType != null){
                 String ct = contentType.getValue();
                 res.setContentType(ct);
@@ -290,7 +279,7 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
 
             res.setResponseHeaders(getResponseHeaders(httpResponse));
             if (res.isRedirect()) {
-                final Header headerLocation = httpResponse.getLastHeader(HTTPConstants.HEADER_LOCATION);
+                final Header headerLocation = httpResponse.getLastHeader(UPMPConstant.HEADER_LOCATION);
                 if (headerLocation == null) { // HTTP protocol violation, but avoids NPE
                     throw new IllegalArgumentException("Missing location header");
                 }
@@ -555,9 +544,9 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
 	    // leave it to the server to close the connection after their
 	    // timeout period. Leave it to the JMeter user to decide.
 	    if (getUseKeepAlive()) {
-	        httpRequest.setHeader(HTTPConstants.HEADER_CONNECTION, HTTPConstants.KEEP_ALIVE);
+	        httpRequest.setHeader(UPMPConstant.HEADER_CONNECTION, UPMPConstant.KEEP_ALIVE);
 	    } else {
-	        httpRequest.setHeader(HTTPConstants.HEADER_CONNECTION, HTTPConstants.CONNECTION_CLOSE);
+	        httpRequest.setHeader(UPMPConstant.HEADER_CONNECTION, UPMPConstant.CONNECTION_CLOSE);
 	    }
 	
 	    setConnectionHeaders(httpRequest, url, getHeaderManager(), getCacheManager());
@@ -617,7 +606,7 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
         if (cookieManager != null) {
             cookieHeader = cookieManager.getCookieHeaderForURL(url);
             if (cookieHeader != null) {
-                request.setHeader(HTTPConstants.HEADER_COOKIE, cookieHeader);
+                request.setHeader(UPMPConstant.HEADER_COOKIE, cookieHeader);
             }
         }
         return cookieHeader;
@@ -648,9 +637,9 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
                     String n = header.getName();
                     // Don't allow override of Content-Length
                     // TODO - what other headers are not allowed?
-                    if (! HTTPConstants.HEADER_CONTENT_LENGTH.equalsIgnoreCase(n)){
+                    if (! UPMPConstant.HEADER_CONTENT_LENGTH.equalsIgnoreCase(n)){
                         String v = header.getValue();
-                        if (HTTPConstants.HEADER_HOST.equalsIgnoreCase(n)) {
+                        if (UPMPConstant.HEADER_HOST.equalsIgnoreCase(n)) {
                             int port = url.getPort();
                             v = v.replaceFirst(":\\d+$",""); // remove any port specification // $NON-NLS-1$ $NON-NLS-2$
                             if (port != -1) {
@@ -684,7 +673,7 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
         Header[] requestHeaders = method.getAllHeaders();
         for(int i = 0; i < requestHeaders.length; i++) {
             // Exclude the COOKIE header, since cookie is reported separately in the sample
-            if(!HTTPConstants.HEADER_COOKIE.equalsIgnoreCase(requestHeaders[i].getName())) {
+            if(!UPMPConstant.HEADER_COOKIE.equalsIgnoreCase(requestHeaders[i].getName())) {
                 hdrs.append(requestHeaders[i].getName());
                 hdrs.append(": "); // $NON-NLS-1$
                 hdrs.append(requestHeaders[i].getValue());
@@ -734,25 +723,6 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
         }
     }
 
-    // Helper class so we can generate request data without dumping entire file contents
-    private static class ViewableFileBody extends FileBody {
-        private boolean hideFileData;
-        
-        public ViewableFileBody(File file, String mimeType) {
-            super(file, mimeType);
-            hideFileData = false;
-        }
-
-        @Override
-        public void writeTo(final OutputStream out) throws IOException {
-            if (hideFileData) {
-                out.write("<actual file content, not shown here>".getBytes());// encoding does not really matter here
-            } else {
-                super.writeTo(out);
-            }
-        }
-    }
-
     // TODO needs cleaning up
     private String sendPostData(HttpPost post)  throws IOException {
         // Buffer to hold the post body, except file content
@@ -763,7 +733,7 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
 
 		// Check if the header manager had a content type header
 		// This allows the user to specify his own content-type for a POST request
-		Header contentTypeHeader = post.getFirstHeader(HTTPConstants.HEADER_CONTENT_TYPE);
+		Header contentTypeHeader = post.getFirstHeader(UPMPConstant.HEADER_CONTENT_TYPE);
 		boolean hasContentTypeHeader = contentTypeHeader != null && contentTypeHeader.getValue() != null && contentTypeHeader.getValue().length() > 0;
 
 		if(haveContentEncoding) {
@@ -771,7 +741,7 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
 		}
 
 		if(!hasContentTypeHeader) {
-			post.setHeader(HTTPConstants.HEADER_CONTENT_TYPE, HTTPConstants.APPLICATION_X_WWW_FORM_URLENCODED);
+			post.setHeader(UPMPConstant.HEADER_CONTENT_TYPE, UPMPConstant.APPLICATION_X_WWW_FORM_URLENCODED);
 		}
 		// Add the parameters
 		PropertyIterator args = getArguments().iterator();
@@ -937,7 +907,7 @@ public class UPMPHC4Impl extends UPMPHCAbstractImpl {
 
     private void saveConnectionCookies(HttpResponse method, URL u, CookieManager cookieManager) {
         if (cookieManager != null) {
-            Header[] hdrs = method.getHeaders(HTTPConstants.HEADER_SET_COOKIE);
+            Header[] hdrs = method.getHeaders(UPMPConstant.HEADER_SET_COOKIE);
             for (Header hdr : hdrs) {
                 cookieManager.addCookieFromHeader(hdr.getValue(),u);
             }

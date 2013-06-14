@@ -49,11 +49,11 @@ public class UPMPSampleResult extends SampleResult {
         redirectLocation=res.redirectLocation;
     }
 
-    public void setHTTPMethod(String method) {
+    public void setUPMPMethod(String method) {
         this.method = method;
     }
 
-    public String getHTTPMethod() {
+    public String getUPMPMethod() {
         return method;
     }
 
@@ -90,7 +90,7 @@ public class UPMPSampleResult extends SampleResult {
         // since this might change the conditions under which the request was issued.
         // See Bug 54119
         if ("307".equals(code) && 
-                (HTTPConstants.GET.equals(getHTTPMethod()) || HTTPConstants.HEAD.equals(getHTTPMethod()))) {
+                (HTTPConstants.GET.equals(getUPMPMethod()) || HTTPConstants.HEAD.equals(getUPMPMethod()))) {
             return true;
         }
         return false;
