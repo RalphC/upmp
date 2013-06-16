@@ -77,7 +77,7 @@ public class UPMPArgumentsPanel extends ArgumentsPanel {
 
     @Override
     protected HTTPArgument makeNewArgument() {
-        HTTPArgument arg = new HTTPArgument("", "");
+    	HTTPArgument arg = new HTTPArgument("", "");
         arg.setAlwaysEncoded(false);
         arg.setUseEquals(true);
         return arg;
@@ -97,7 +97,7 @@ public class UPMPArgumentsPanel extends ArgumentsPanel {
     /**
      * Convert the argument panel contents to an {@link Arguments} collection.
      * 
-     * @return a collection of {@link HTTPArgument} entries
+     * @return a collection of {@link UPMPArgument} entries
      */
     public Arguments getParameters() {
         Arguments args = getUnclonedParameters();
@@ -110,7 +110,7 @@ public class UPMPArgumentsPanel extends ArgumentsPanel {
         Iterator<HTTPArgument> modelData = (Iterator<HTTPArgument>) tableModel.iterator();
         Arguments args = new Arguments();
         while (modelData.hasNext()) {
-            HTTPArgument arg = modelData.next();
+        	HTTPArgument arg = modelData.next();
             args.addArgument(arg);
         }
         return args;
@@ -124,7 +124,7 @@ public class UPMPArgumentsPanel extends ArgumentsPanel {
             HTTPArgument.convertArgumentsToHTTP((Arguments) el);
             PropertyIterator iter = ((Arguments) el).getArguments().iterator();
             while (iter.hasNext()) {
-                HTTPArgument arg = (HTTPArgument) iter.next().getObjectValue();
+            	HTTPArgument arg = (HTTPArgument) iter.next().getObjectValue();
                 tableModel.addRow(arg);
             }
         }

@@ -43,7 +43,6 @@ import org.apache.jmeter.protocol.http.parser.HTMLParser;
 
 import com.unionpay.upmp.jmeterplugin.UPMPSampleResult;
 import com.unionpay.upmp.jmeterplugin.UPMPSamplerBase;
-import com.unionpay.upmp.util.HTTPArgument;
 import com.unionpay.upmp.util.HTTPConstantsInterface;
 import com.unionpay.upmp.util.HTTPFileArg;
 import com.unionpay.upmp.util.HTTPFileArgs;
@@ -51,6 +50,7 @@ import com.unionpay.upmp.util.UPMPConstant;
 
 import org.apache.jmeter.protocol.http.util.ConversionUtils;
 import org.apache.jmeter.protocol.http.util.EncoderCache;
+import org.apache.jmeter.protocol.http.util.HTTPArgument;
 
 import org.apache.jmeter.samplers.AbstractSampler;
 import org.apache.jmeter.samplers.Entry;
@@ -325,7 +325,7 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
             boolean noArgumentsHasName = true;
             PropertyIterator args = getArguments().iterator();
             while (args.hasNext()) {
-                HTTPArgument arg = (HTTPArgument) args.next().getObjectValue();
+            	HTTPArgument arg = (HTTPArgument) args.next().getObjectValue();
                 if(arg.getName() != null && arg.getName().length() > 0) {
                     noArgumentsHasName = false;
                     break;
@@ -563,7 +563,7 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
     }
 
     public void addNonEncodedArgument(String name, String value, String metadata) {
-        HTTPArgument arg = new HTTPArgument(name, value, metadata, false);
+    	HTTPArgument arg = new HTTPArgument(name, value, metadata, false);
         arg.setAlwaysEncoded(false);
         this.getArguments().addArgument(arg);
     }
@@ -935,7 +935,7 @@ public abstract class UPMPSamplerBase extends AbstractSampler implements
         PropertyIterator iter = getArguments().iterator();
         boolean first = true;
         while (iter.hasNext()) {
-            HTTPArgument item = null;
+        	HTTPArgument item = null;
             /*
              * N.B. Revision 323346 introduced the ClassCast check, but then used iter.next()
              * to fetch the item to be cast, thus skipping the element that did not cast.

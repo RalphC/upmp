@@ -21,13 +21,13 @@ package com.unionpay.upmp.jmeterplugin;
 import java.io.Serializable;
 
 import org.apache.jmeter.config.Arguments;
+import org.apache.jmeter.protocol.http.util.HTTPArgument;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.util.JOrphanUtils;
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
 
-import com.unionpay.upmp.util.HTTPArgument;
 import com.unionpay.upmp.util.HTTPFileArgs;
 
 /**

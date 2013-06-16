@@ -255,7 +255,7 @@ public class UrlConfigGui extends JPanel implements ChangeListener {
         StringBuilder postBody = new StringBuilder();
         PropertyIterator args = arguments.iterator();
         while (args.hasNext()) {
-            HTTPArgument arg = (HTTPArgument) args.next().getObjectValue();
+        	HTTPArgument arg = (HTTPArgument) args.next().getObjectValue();
             String value = arg.getValue();
             if (crlfToLF) {
                 value=value.replaceAll("\r\n", "\n"); // See modifyTestElement

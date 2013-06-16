@@ -64,6 +64,7 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import org.apache.jmeter.config.Argument;
 import org.apache.jmeter.protocol.http.control.AuthManager;
 import org.apache.jmeter.protocol.http.control.Authorization;
 import org.apache.jmeter.protocol.http.control.CacheManager;
@@ -72,6 +73,7 @@ import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.protocol.http.sampler.HttpClientDefaultParameters;
 import org.apache.jmeter.protocol.http.util.EncoderCache;
 import org.apache.jmeter.protocol.http.util.HC4TrustAllSSLSocketFactory;
+import org.apache.jmeter.protocol.http.util.HTTPArgument;
 
 import org.apache.jmeter.protocol.http.util.SlowHC4SSLSocketFactory;
 import org.apache.jmeter.protocol.http.util.SlowHC4SocketFactory;
@@ -86,7 +88,6 @@ import com.unionpay.upmp.sdk.conf.UpmpConfig;
 import com.unionpay.upmp.sdk.service.UpmpService;
 import com.unionpay.upmp.sdk.util.UpmpCore;
 import com.unionpay.upmp.util.BytesUtil;
-import com.unionpay.upmp.util.HTTPArgument;
 import com.unionpay.upmp.util.HTTPFileArg;
 import com.unionpay.upmp.util.RSAUtil;
 
@@ -882,7 +883,7 @@ public class UPMPInsImpl extends UPMPAbstractImpl {
             StringBuilder entityBodyContent = new StringBuilder();
             PropertyIterator args = getArguments().iterator();
             while (args.hasNext()) {
-                HTTPArgument arg = (HTTPArgument) args.next().getObjectValue();
+            	HTTPArgument arg = (HTTPArgument) args.next().getObjectValue();
                 // Note: if "Encoded?" is not selected, arg.getEncodedValue is equivalent to arg.getValue
                 if (charset!= null) {
                     entityBodyContent.append(arg.getEncodedValue(charset));                    

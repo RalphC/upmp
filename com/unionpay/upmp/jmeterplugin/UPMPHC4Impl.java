@@ -71,6 +71,7 @@ import org.apache.jmeter.protocol.http.control.HeaderManager;
 import org.apache.jmeter.protocol.http.sampler.HttpClientDefaultParameters;
 import org.apache.jmeter.protocol.http.util.EncoderCache;
 import org.apache.jmeter.protocol.http.util.HC4TrustAllSSLSocketFactory;
+import org.apache.jmeter.protocol.http.util.HTTPArgument;
 import org.apache.jmeter.protocol.http.util.SlowHC4SSLSocketFactory;
 import org.apache.jmeter.protocol.http.util.SlowHC4SocketFactory;
 import org.apache.jmeter.testelement.property.CollectionProperty;
@@ -79,7 +80,6 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 import com.unionpay.upmp.sdk.service.UpmpService;
-import com.unionpay.upmp.util.HTTPArgument;
 import com.unionpay.upmp.util.HTTPFileArg;
 import com.unionpay.upmp.util.UPMPConstant;
 
@@ -840,7 +840,7 @@ public class UPMPHC4Impl extends UPMPAbstractImpl {
             StringBuilder entityBodyContent = new StringBuilder();
             PropertyIterator args = getArguments().iterator();
             while (args.hasNext()) {
-                HTTPArgument arg = (HTTPArgument) args.next().getObjectValue();
+            	HTTPArgument arg = (HTTPArgument) args.next().getObjectValue();
                 // Note: if "Encoded?" is not selected, arg.getEncodedValue is equivalent to arg.getValue
                 if (charset!= null) {
                     entityBodyContent.append(arg.getEncodedValue(charset));                    
