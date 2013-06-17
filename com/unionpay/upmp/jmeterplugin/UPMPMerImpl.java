@@ -1,16 +1,14 @@
 package com.unionpay.upmp.jmeterplugin;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
+import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,16 +30,8 @@ import org.apache.http.auth.NTCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpRequestRetryHandler;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
@@ -49,7 +39,6 @@ import org.apache.http.client.protocol.ResponseContentEncoding;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -61,7 +50,6 @@ import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.ExecutionContext;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.jmeter.protocol.http.control.AuthManager;
 import org.apache.jmeter.protocol.http.control.Authorization;
@@ -79,16 +67,19 @@ import org.apache.jmeter.testelement.property.PropertyIterator;
 import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
+
 import com.unionpay.upmp.sdk.service.UpmpService;
-import com.unionpay.upmp.util.HTTPFileArg;
+import com.unionpay.upmp.sdk.util.UpmpCore;
+import com.unionpay.upmp.util.BytesUtil;
+import com.unionpay.upmp.util.RSAUtil;
 import com.unionpay.upmp.util.UPMPConstant;
 
-public class UPMPHC4Impl extends UPMPAbstractImpl {
+public class UPMPMerImpl extends UPMPAbstractImpl {
 
     private static final Logger log = LoggingManager.getLoggerForClass();
 
     /** retry count to be used (default 1); 0 = disable retries */
-    private static final int RETRY_COUNT = JMeterUtils.getPropDefault("httpclient4.retrycount", 1);
+    private static final int RETRY_COUNT = 0;
 
     private static final String CONTEXT_METRICS = "jmeter_metrics"; // TODO hack, to be removed later
 
@@ -179,7 +170,7 @@ public class UPMPHC4Impl extends UPMPAbstractImpl {
 
     private volatile HttpUriRequest currentRequest; // Accessed from multiple threads
 
-    protected UPMPHC4Impl(UPMPSamplerBase testElement) {
+    protected UPMPMerImpl(UPMPSamplerBase testElement) {
         super(testElement);
     }
 
@@ -201,20 +192,6 @@ public class UPMPHC4Impl extends UPMPAbstractImpl {
             URI uri = url.toURI();
             if (method.equals(UPMPConstant.POST)) {
                 httpRequest = new HttpPost(uri);
-            } else if (method.equals(UPMPConstant.PUT)) {
-                httpRequest = new HttpPut(uri);
-            } else if (method.equals(UPMPConstant.HEAD)) {
-                httpRequest = new HttpHead(uri);
-            } else if (method.equals(UPMPConstant.TRACE)) {
-                httpRequest = new HttpTrace(uri);
-            } else if (method.equals(UPMPConstant.OPTIONS)) {
-                httpRequest = new HttpOptions(uri);
-            } else if (method.equals(UPMPConstant.DELETE)) {
-                httpRequest = new HttpDelete(uri);
-            } else if (method.equals(UPMPConstant.GET)) {
-                httpRequest = new HttpGet(uri);
-            } else if (method.equals(UPMPConstant.PATCH)) {
-                httpRequest = new HttpPatch(uri);
             } else {
                 throw new IllegalArgumentException("Unexpected method: "+method);
             }
@@ -246,9 +223,6 @@ public class UPMPHC4Impl extends UPMPAbstractImpl {
             if (method.equals(UPMPConstant.POST)) {
                 String postBody = sendPostData((HttpPost)httpRequest);
                 res.setQueryString(postBody);
-            } else if (method.equals(UPMPConstant.PUT) || method.equals(UPMPConstant.PATCH)) {
-                String entityBody = sendEntityData(( HttpEntityEnclosingRequestBase)httpRequest);
-                res.setQueryString(entityBody);
             }
             HttpResponse httpResponse = httpClient.execute(httpRequest, localContext); // perform the sample
 
@@ -772,6 +746,7 @@ public class UPMPHC4Impl extends UPMPAbstractImpl {
 			// Add the parameter, httpclient will urlencode it
 			req.put(parameterName, parameterValue);
 		}
+		
 		String request = UpmpService.buildReq(req);
 		
 		StringEntity entity = new StringEntity(request);
@@ -785,91 +760,6 @@ public class UPMPHC4Impl extends UPMPAbstractImpl {
     // e.g. post checks for multipart form/files, and if not, invokes sendData(HttpEntityEnclosingRequestBase)
 
 
-    /**
-     * Creates the entity data to be sent.
-     * <p>
-     * If there is a file entry with a non-empty MIME type we use that to
-     * set the request Content-Type header, otherwise we default to whatever
-     * header is present from a Header Manager.
-     * <p>
-     * If the content charset {@link #getContentEncoding()} is null or empty 
-     * we use the HC4 default provided by {@link HTTP.DEF_CONTENT_CHARSET} which is
-     * ISO-8859-1.
-     * 
-     * @param entity to be processed, e.g. PUT or PATCH
-     * @return the entity content, may be empty
-     * @throws  UnsupportedEncodingException for invalid charset name
-     * @throws IOException cannot really occur for ByteArrayOutputStream methods
-     */
-    private String sendEntityData( HttpEntityEnclosingRequestBase entity) throws IOException {
-        // Buffer to hold the entity body
-        StringBuilder entityBody = new StringBuilder(1000);
-        boolean hasEntityBody = false;
-
-        final HTTPFileArg files[] = getHTTPFiles();
-        // Allow the mimetype of the file to control the content type
-        // This is not obvious in GUI if you are not uploading any files,
-        // but just sending the content of nameless parameters
-        final HTTPFileArg file = files.length > 0? files[0] : null;
-        String contentTypeValue = null;
-        if(file != null && file.getMimeType() != null && file.getMimeType().length() > 0) {
-            contentTypeValue = file.getMimeType();
-            entity.setHeader(HEADER_CONTENT_TYPE, contentTypeValue); // we provide the MIME type here
-        }
-
-        // Check for local contentEncoding (charset) override; fall back to default for content body
-        // we do this here rather so we can use the same charset to retrieve the data
-        final String charset = getContentEncoding(HTTP.DEF_CONTENT_CHARSET.name());
-
-        // Only create this if we are overriding whatever default there may be
-        // If there are no arguments, we can send a file as the body of the request
-
-        if(!hasArguments() && getSendFileAsPostBody()) {
-            hasEntityBody = true;
-
-            // If getSendFileAsPostBody returned true, it's sure that file is not null
-            FileEntity fileRequestEntity = new FileEntity(new File(files[0].getPath())); // no need for content-type here
-            entity.setEntity(fileRequestEntity);
-        }
-        // If none of the arguments have a name specified, we
-        // just send all the values as the entity body
-        else if(getSendParameterValuesAsPostBody()) {
-            hasEntityBody = true;
-
-            // Just append all the parameter values, and use that as the entity body
-            StringBuilder entityBodyContent = new StringBuilder();
-            PropertyIterator args = getArguments().iterator();
-            while (args.hasNext()) {
-            	HTTPArgument arg = (HTTPArgument) args.next().getObjectValue();
-                // Note: if "Encoded?" is not selected, arg.getEncodedValue is equivalent to arg.getValue
-                if (charset!= null) {
-                    entityBodyContent.append(arg.getEncodedValue(charset));                    
-                } else {
-                    entityBodyContent.append(arg.getEncodedValue());
-                }
-            }
-            StringEntity requestEntity = new StringEntity(entityBodyContent.toString(), charset);
-            entity.setEntity(requestEntity);
-        }
-        // Check if we have any content to send for body
-        if(hasEntityBody) {
-            // If the request entity is repeatable, we can send it first to
-            // our own stream, so we can return it
-            final HttpEntity entityEntry = entity.getEntity();
-            if(entityEntry.isRepeatable()) {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                entityEntry.writeTo(bos);
-                bos.flush();
-                // We get the posted bytes using the charset that was used to create them
-                entityBody.append(new String(bos.toByteArray(), charset));
-                bos.close();
-            }
-            else { // this probably cannot happen
-                entityBody.append("<RequestEntity was not repeatable, cannot view what was sent>");
-            }
-        }
-        return entityBody.toString(); // may be the empty string
-    }
 
     /**
      * 
@@ -955,5 +845,19 @@ public class UPMPHC4Impl extends UPMPAbstractImpl {
     protected void notifySSLContextWasReset() {
         log.debug("closeThreadLocalConnections called");
         closeThreadLocalConnections();
+    }
+    
+    /**
+     * build PayData
+     * @param req 
+     * @return payData
+     */
+    public static String buildPayData(Map<String, String> req) {
+        StringBuilder paydata = new StringBuilder();
+        paydata.append(UpmpCore.createLinkString(req, false, false));
+        PublicKey pubKey = RSAUtil.generateRSAPublicKey(UPMPConstant.instModulus, UPMPConstant.instPublicExponent);
+        byte[] encodeBytes = RSAUtil.encrypt(paydata.toString().getBytes(), pubKey);
+        String encodePaydata = BytesUtil.bytesToHex(encodeBytes);
+        return encodePaydata;
     }
 }

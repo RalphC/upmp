@@ -84,17 +84,7 @@ public class UPMPTestSampleGui extends AbstractSamplerGui
     @Override
     public void configure(TestElement element) {
         super.configure(element);
-        //final UPMPSamplerBase samplerBase = (UPMPSamplerBase) element;
         urlConfigGui.configure(element);
-        //getImages.setSelected(samplerBase.isImageParser());
-        //concurrentDwn.setSelected(samplerBase.isConcurrentDwn());
-        //concurrentPool.setText(samplerBase.getConcurrentPool());
-        //isMon.setSelected(samplerBase.isMonitor());
-        //useMD5.setSelected(samplerBase.useMD5());
-        //embeddedRE.setText(samplerBase.getEmbeddedUrlRE());
-        //if (!isAJP) {
-        //    sourceIpAddr.setText(samplerBase.getIpSource());
-        //}
     }
 
     /**
@@ -116,17 +106,6 @@ public class UPMPTestSampleGui extends AbstractSamplerGui
     public void modifyTestElement(TestElement sampler) {
         sampler.clear();
         urlConfigGui.modifyTestElement(sampler);
-//        final UPMPSamplerBase samplerBase = (UPMPSamplerBase) sampler;
-//        samplerBase.setImageParser(getImages.isSelected());
-//        enableConcurrentDwn(getImages.isSelected());
-//        samplerBase.setConcurrentDwn(concurrentDwn.isSelected());
-//        samplerBase.setConcurrentPool(concurrentPool.getText());
-//        samplerBase.setMonitor(isMon.isSelected());
-//        samplerBase.setMD5(useMD5.isSelected());
-//        samplerBase.setEmbeddedUrlRE(embeddedRE.getText());
-//        if (!isAJP) {
-//            samplerBase.setIpSource(sourceIpAddr.getText());
-//        }
         this.configureTestElement(sampler);
     }
 

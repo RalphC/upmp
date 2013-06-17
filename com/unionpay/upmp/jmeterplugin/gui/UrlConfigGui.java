@@ -118,8 +118,6 @@ public class UrlConfigGui extends JPanel implements ChangeListener {
     // Tabbed pane that contains parameters and raw body
     private ValidationTabbedPane postContentTabbedPane;
 
-    private boolean showRawBodyPane;
-
     public UrlConfigGui() {
         this(true);
     }
@@ -139,7 +137,6 @@ public class UrlConfigGui extends JPanel implements ChangeListener {
     public UrlConfigGui(boolean showSamplerFields, boolean showImplementation, boolean showRawBodyPane) {
         notConfigOnly=showSamplerFields;
         this.showImplementation = showImplementation;
-        this.showRawBodyPane = showRawBodyPane;
         init();
     }
 
@@ -167,9 +164,6 @@ public class UrlConfigGui extends JPanel implements ChangeListener {
         protocol.setText(""); // $NON-NLS-1$
         contentEncoding.setText(""); // $NON-NLS-1$
         argsPanel.clear();
-//        if(showRawBodyPane) {
-//            postBodyContent.setText("");// $NON-NLS-1$
-//        }
         postContentTabbedPane.setSelectedIndex(TAB_PARAMETERS, false);
     }
 
@@ -598,10 +592,6 @@ public class UrlConfigGui extends JPanel implements ChangeListener {
         postContentTabbedPane = new ValidationTabbedPane();
         argsPanel = new UPMPArgumentsPanel();
         postContentTabbedPane.add(UPMPConstant.post_as_parameters, argsPanel);// $NON-NLS-1$
-//        if(showRawBodyPane) {
-//            postBodyContent = new JLabeledTextArea(JMeterUtils.getResString("post_body_raw"));// $NON-NLS-1$
-//            postContentTabbedPane.add(JMeterUtils.getResString("post_body"), postBodyContent);// $NON-NLS-1$
-//        }
         return postContentTabbedPane;
     }
 

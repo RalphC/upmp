@@ -24,21 +24,13 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
-import org.apache.jmeter.protocol.http.gui.HTTPFileArgsPanel;
 import org.apache.jmeter.testelement.TestElement;
-import org.apache.jmeter.util.JMeterUtils;
 
 import com.unionpay.upmp.util.UPMPConstant;
 
 public class MultipartUrlConfigGui extends UrlConfigGui {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Files panel that holds file informations to be uploaded by
-     * http request.
-     */
-    private HTTPFileArgsPanel filesPanel;
 
     // used by HttpTestSampleGui
     public MultipartUrlConfigGui() {
@@ -60,13 +52,11 @@ public class MultipartUrlConfigGui extends UrlConfigGui {
     @Override
     public void modifyTestElement(TestElement sampler) {
         super.modifyTestElement(sampler);
-        //filesPanel.modifyTestElement(sampler);
     }
 
     @Override
     public void configure(TestElement el) {
         super.configure(el);
-        //filesPanel.configure(el);
     }
 
     private void init() {// called from ctor, so must not be overridable
@@ -85,16 +75,10 @@ public class MultipartUrlConfigGui extends UrlConfigGui {
 
         webRequestPanel.add(northPanel, BorderLayout.NORTH);
         webRequestPanel.add(getParameterPanel(), BorderLayout.CENTER);
-        //webRequestPanel.add(getHTTPFileArgsPanel(), BorderLayout.SOUTH);
 
         this.add(getWebServerTimeoutPanel(), BorderLayout.NORTH);
         this.add(webRequestPanel, BorderLayout.CENTER);
         this.add(getProxyServerPanel(), BorderLayout.SOUTH);
-    }
-
-    private JPanel getHTTPFileArgsPanel() {
-        filesPanel = new HTTPFileArgsPanel(JMeterUtils.getResString("send_file")); // $NON-NLS-1$
-        return filesPanel;
     }
 
     /**
@@ -103,6 +87,5 @@ public class MultipartUrlConfigGui extends UrlConfigGui {
     @Override
     public void clear() {
         super.clear();
-        //filesPanel.clear();
     }
 }

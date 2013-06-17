@@ -64,9 +64,6 @@ public class UPMPSamplerFactory {
     }
 
     public static UPMPAbstractImpl getImplementation(String impl, UPMPSamplerBase base){
-//        if (UPMPSamplerBase.PROTOCOL_FILE.equals(base.getProtocol())) {
-//            return new HTTPFileImpl(base);
-//        }
         if (JOrphanUtils.isBlank(impl)){
             impl = DEFAULT_CLASSNAME;
         }
