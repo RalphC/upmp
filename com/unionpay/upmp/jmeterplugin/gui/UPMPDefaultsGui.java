@@ -41,6 +41,7 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.gui.JLabeledTextField;
 
 import com.unionpay.upmp.jmeterplugin.UPMPSamplerBase;
+import com.unionpay.upmp.util.UPMPConstant;
 
 public class UPMPDefaultsGui extends AbstractConfigGui {
 
@@ -52,7 +53,7 @@ public class UPMPDefaultsGui extends AbstractConfigGui {
     
     private JTextField concurrentPool; 
 
-    private UrlConfigGui urlConfig;
+    private UPMPUrlConfigGui urlConfig;
 
     private JLabeledTextField embeddedRE; // regular expression used to match against embedded resource URLs
 
@@ -147,7 +148,7 @@ public class UPMPDefaultsGui extends AbstractConfigGui {
 
         add(makeTitlePanel(), BorderLayout.NORTH);
 
-        urlConfig = new UrlConfigGui(false, true, false);
+        urlConfig = new UPMPUrlConfigGui(false, true, false);
         add(urlConfig, BorderLayout.CENTER);
 
         // OPTIONAL TASKS
@@ -213,5 +214,10 @@ public class UPMPDefaultsGui extends AbstractConfigGui {
         } else {
             enableConcurrentDwn(false);
         }
+    }
+    
+    @Override
+    public String getStaticLabel() {
+    	return UPMPConstant.url_config_title;
     }
 }

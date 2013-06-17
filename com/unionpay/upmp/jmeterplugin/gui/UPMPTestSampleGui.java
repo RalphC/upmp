@@ -49,7 +49,7 @@ public class UPMPTestSampleGui extends AbstractSamplerGui
     implements ItemListener {
     private static final long serialVersionUID = 1L;
 
-    private MultipartUrlConfigGui urlConfigGui;
+    private UPMPMultipartUrlConfigGui urlConfigGui;
 
     private JCheckBox getImages;
     
@@ -129,7 +129,7 @@ public class UPMPTestSampleGui extends AbstractSamplerGui
         add(makeTitlePanel(), BorderLayout.NORTH);
 
         // URL CONFIG
-        urlConfigGui = new MultipartUrlConfigGui(true, !isAJP);
+        urlConfigGui = new UPMPMultipartUrlConfigGui(true, !isAJP);
         add(urlConfigGui, BorderLayout.CENTER);
 
         // OPTIONAL TASKS

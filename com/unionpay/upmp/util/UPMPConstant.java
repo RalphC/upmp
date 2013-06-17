@@ -8,6 +8,7 @@ public final class UPMPConstant implements HTTPConstantsInterface{
 	public static String upmp_testing_embedded_url_pattern = "Embedded URLs must match:";
 	public static String upmp_testing2_source_ip = "Source IP address:";
 	public static String upmp_request = "UPMP Request";
+	public static String url_config_title = "UPMP Request Defaults";
 	public static String upmp_server = "UPMP Server";
 	public static String upmp_server_timeout_title = "Timeouts (milliseconds)";
 	public static String upmp_proxy_server_title = "Proxy Server";

@@ -28,23 +28,23 @@ import org.apache.jmeter.testelement.TestElement;
 
 import com.unionpay.upmp.util.UPMPConstant;
 
-public class MultipartUrlConfigGui extends UrlConfigGui {
+public class UPMPMultipartUrlConfigGui extends UPMPUrlConfigGui {
 
     private static final long serialVersionUID = 1L;
 
     // used by HttpTestSampleGui
-    public MultipartUrlConfigGui() {
+    public UPMPMultipartUrlConfigGui() {
         super();
         init();
     }
 
     // not currently used
-    public MultipartUrlConfigGui(boolean showSamplerFields) {
+    public UPMPMultipartUrlConfigGui(boolean showSamplerFields) {
         super(showSamplerFields);
         init();
     }
 
-    public MultipartUrlConfigGui(boolean showSamplerFields, boolean showImplementation) {
+    public UPMPMultipartUrlConfigGui(boolean showSamplerFields, boolean showImplementation) {
         super(showSamplerFields, showImplementation, true);
         init();
     }

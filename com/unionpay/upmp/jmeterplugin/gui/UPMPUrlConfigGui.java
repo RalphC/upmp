@@ -61,7 +61,7 @@ import com.unionpay.upmp.util.UPMPConstant;
  * - path, method, encoding, parameters
  * - redirects & keepalive
  */
-public class UrlConfigGui extends JPanel implements ChangeListener {
+public class UPMPUrlConfigGui extends JPanel implements ChangeListener {
 
     private static final long serialVersionUID = 1L;
 
@@ -118,14 +118,14 @@ public class UrlConfigGui extends JPanel implements ChangeListener {
     // Tabbed pane that contains parameters and raw body
     private ValidationTabbedPane postContentTabbedPane;
 
-    public UrlConfigGui() {
+    public UPMPUrlConfigGui() {
         this(true);
     }
 
     /**
      * @param showSamplerFields
      */
-    public UrlConfigGui(boolean showSamplerFields) {
+    public UPMPUrlConfigGui(boolean showSamplerFields) {
         this(showSamplerFields, true, true);
     }
 
@@ -134,7 +134,7 @@ public class UrlConfigGui extends JPanel implements ChangeListener {
      * @param showImplementation Show HTTP Implementation
      * @param showRawBodyPane 
      */
-    public UrlConfigGui(boolean showSamplerFields, boolean showImplementation, boolean showRawBodyPane) {
+    public UPMPUrlConfigGui(boolean showSamplerFields, boolean showImplementation, boolean showRawBodyPane) {
         notConfigOnly=showSamplerFields;
         this.showImplementation = showImplementation;
         init();
