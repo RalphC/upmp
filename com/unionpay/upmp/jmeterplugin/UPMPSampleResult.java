@@ -12,6 +12,8 @@ public class UPMPSampleResult extends SampleResult {
     private String cookies = ""; // never null
 
     private String method;
+    
+    private String type;
 
     /**
      * The raw value of the Location: header; may be null.
@@ -206,6 +208,14 @@ public class UPMPSampleResult extends SampleResult {
     public void setResponseNoContent(){
         setResponseCode(HTTP_NO_CONTENT_CODE);
         setResponseMessage(HTTP_NO_CONTENT_MSG);
+    }
+    
+    public void setUPMPType(String type) {
+        this.type = type;
+    }
+
+    public String getUPMPType() {
+        return type;
     }
     
 }

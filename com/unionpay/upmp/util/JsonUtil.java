@@ -1,5 +1,6 @@
 package com.unionpay.upmp.util;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Map;
 
@@ -29,17 +30,17 @@ public class JsonUtil
     return null;
   }
 
-//  public static <T> T fromFile(String file, Class<T> t)
-//  {
-//    File f = new File(file);
-//
-//    if ((!f.exists()) || (!f.isFile())) {
-//      logger.warn("File[" + file + "] does not exist.");
-//      return null;
-//    }
-//
-//    return fromJson(FileUtil.loadFileAsString(file), t);
-//  }
+  public static <T> T fromFile(String file, Class<T> t)
+  {
+    File f = new File(file);
+
+    if ((!f.exists()) || (!f.isFile())) {
+      logger.warn("File[" + file + "] does not exist.");
+      return null;
+    }
+
+    return fromJson(FileUtil.loadFileAsString(file), t);
+  }
 
   public static <T> T fromJsonWithException(String json, Class<T> t) {
     try {

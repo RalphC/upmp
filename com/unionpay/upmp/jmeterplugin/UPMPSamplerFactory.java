@@ -1,7 +1,8 @@
 package com.unionpay.upmp.jmeterplugin;
 
-import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.util.JOrphanUtils;
+
+import com.unionpay.upmp.util.UPMPConstant;
 
 public class UPMPSamplerFactory {
     // N.B. These values are used in jmeter.properties (jmeter.httpsampler) - do not change
@@ -20,8 +21,13 @@ public class UPMPSamplerFactory {
     public static final String IMPL_JAVA = "Java"; // $NON-NLS-1$
     //- JMX
 
-    public static final String DEFAULT_CLASSNAME =
-        JMeterUtils.getPropDefault("jmeter.httpsampler", IMPL_HTTP_CLIENT4); //$NON-NLS-1$
+    public static final String IMPL_UPMP_MERCHANT = "UPMPMerchant";  // $NON-NLS-1$
+
+    public static final String IMPL_UPMP_INS = "UPMPIns"; // $NON-NLS-1$
+    
+    public static final String IMPL_UPMP_MOBILE = "UPMPMobile"; // $NON-NLS-1$
+    
+    public static final String DEFAULT_CLASSNAME = UPMPConstant.DEFAULT_CLASSNAME; //$NON-NLS-1$
 
     private UPMPSamplerFactory() {
         // Not intended to be instantiated
@@ -47,20 +53,20 @@ public class UPMPSamplerFactory {
         if (alias ==null || alias.length() == 0) {
             return new UPMPSamplerProxy();
         }
-        if (alias.equals(HTTP_SAMPLER_JAVA) || alias.equals(IMPL_JAVA)) {
-            return new UPMPSamplerProxy(IMPL_JAVA);
+        if (alias.equals(HTTP_SAMPLER_JAVA) || alias.equals(IMPL_UPMP_MERCHANT)) {
+            return new UPMPSamplerProxy(IMPL_UPMP_MERCHANT);
         }
-        if (alias.equals(HTTP_SAMPLER_APACHE) || alias.equals(IMPL_HTTP_CLIENT3_1)) {
-            return new UPMPSamplerProxy(IMPL_HTTP_CLIENT3_1);
+        if (alias.equals(HTTP_SAMPLER_APACHE) || alias.equals(IMPL_UPMP_INS)) {
+            return new UPMPSamplerProxy(IMPL_UPMP_INS);
         }
-        if (alias.equals(IMPL_HTTP_CLIENT4)) {
-            return new UPMPSamplerProxy(IMPL_HTTP_CLIENT4);
+        if (alias.equals(IMPL_UPMP_MOBILE)) {
+            return new UPMPSamplerProxy(IMPL_UPMP_MOBILE);
         }
         throw new IllegalArgumentException("Unknown sampler type: '" + alias+"'");
     }
 
     public static String[] getImplementations(){
-        return new String[]{IMPL_HTTP_CLIENT4,IMPL_HTTP_CLIENT3_1,IMPL_JAVA};
+        return new String[]{IMPL_UPMP_MERCHANT,IMPL_UPMP_INS,IMPL_UPMP_MOBILE};
     }
 
     public static UPMPAbstractImpl getImplementation(String impl, UPMPSamplerBase base){
@@ -68,16 +74,15 @@ public class UPMPSamplerFactory {
             impl = DEFAULT_CLASSNAME;
         }
         
-        return new UPMPInsImpl(base);
-//        if (IMPL_JAVA.equals(impl) || HTTP_SAMPLER_JAVA.equals(impl)) {
-//            return new HTTPJavaImpl(base);
-//        } else if (IMPL_HTTP_CLIENT3_1.equals(impl) || HTTP_SAMPLER_APACHE.equals(impl)) {
-//            return new HTTPHC3Impl(base);                
-//        } else if (IMPL_HTTP_CLIENT4.equals(impl)) {
-//            return new HTTPHC4Impl(base);
-//        } else {
-//            throw new IllegalArgumentException("Unknown implementation type: '"+impl+"'");
-//        }
+        if (IMPL_UPMP_MERCHANT.equals(impl) || HTTP_SAMPLER_JAVA.equals(impl)) {
+            return new UPMPMerImpl(base);
+        } else if (IMPL_UPMP_INS.equals(impl) || HTTP_SAMPLER_APACHE.equals(impl)) {
+            return new UPMPInsImpl(base);                
+        } else if (IMPL_UPMP_MOBILE.equals(impl)) {
+            return new UPMPMobileImpl(base);
+        } else {
+            throw new IllegalArgumentException("Unknown implementation type: '"+impl+"'");
+        }
     }
 
 }
