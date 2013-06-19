@@ -135,9 +135,4 @@ public class RequestTemplate {
         }
         return map;
 	}
-	
-	public static void main(String[] args) {
-		System.out.println(System.getProperty("user.dir"));
-		init("RequestTemplate.conf");
-	}
 }

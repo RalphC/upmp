@@ -253,6 +253,7 @@ public class UPMPMobileImpl extends UPMPAbstractImpl {
             res.sampleEnd(); // Done with the sampling proper.
             currentRequest = null;
 
+            
             // Now collect the results into the HTTPSampleResult:
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
