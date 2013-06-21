@@ -45,20 +45,14 @@ public class UPMPMobileMessageBuilder {
 
 	private static String buildInit(Map<String, String> req){
 		byte[] key = BytesUtil.hexToBytes(req.get(KEY_INITKEY));
-	
+		req.remove(KEY_INITKEY);
+		req.put(KEY_SECRET, BytesUtil.bytesToHex(key));
+		
 		Map<String,Object> initReq = RequestTemplate.getInitReqTemplate();
 		@SuppressWarnings("unchecked")
 		Map<String, Object> initParams= (Map<String, Object>) initReq.get(KEY_PARAMS);
 		
-		initParams.put(KEY_TN, req.get(KEY_TN));
-		initParams.put(KEY_SECRET, BytesUtil.bytesToHex(key));
-		addValue(req, initParams, KEY_USER);
-		addValue(req, initParams, KEY_LOCAL);
-		addValue(req, initParams, KEY_TERMINAL_TYPE);
-		addValue(req, initParams, KEY_TERMINAL_VERSION);
-		addValue(req, initParams, KEY_OS_NAME);
-		addValue(req, initParams, KEY_OS_VERSION);
-		
+		initParams.putAll(req);
 		return encrypt(key, initReq);
 	}
 		
@@ -133,11 +127,19 @@ public class UPMPMobileMessageBuilder {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> initParams= (Map<String, Object>) initReq.get(KEY_PARAMS);
 		
-		initParams.put(KEY_TN, req.get(KEY_TN));
-		addValue(req, initParams, KEY_CARD_TYPE);
-		addValue(req, initParams, KEY_BANK);
-		
+		initParams.putAll(req);	
 		return encrypt(key, initReq);
+	}
+	
+	private static String buildPay(Map<String, String> req) {
+		byte[] key = BytesUtil.hexToBytes(req.get(KEY_SECRET));
+		
+		Map<String,Object> payReq = RequestTemplate.getPayReqTemplate();
+		@SuppressWarnings("unchecked")
+		Map<String, Object> initParams= (Map<String, Object>) payReq.get(KEY_PARAMS);
+		
+		initParams.putAll(req);	
+		return encrypt(key, payReq);
 	}
 		
 	private static String encrypt(byte[] key, Map<String,Object> req) {

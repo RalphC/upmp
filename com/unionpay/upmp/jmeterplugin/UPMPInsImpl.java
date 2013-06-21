@@ -11,7 +11,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
-import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -88,7 +87,7 @@ import com.unionpay.upmp.sdk.service.UpmpService;
 import com.unionpay.upmp.sdk.util.UpmpCore;
 import com.unionpay.upmp.util.BytesUtil;
 import com.unionpay.upmp.util.HTTPFileArg;
-import com.unionpay.upmp.util.RSAUtil;
+import com.unionpay.upmp.util.SecurityUtil;
 
 public class UPMPInsImpl extends UPMPAbstractImpl {
 
@@ -779,41 +778,12 @@ public class UPMPInsImpl extends UPMPAbstractImpl {
 			// Add the parameter, httpclient will urlencode it
 			req.put(parameterName, parameterValue);
 		}
-		
-		Map<String, String> payDataMap = new HashMap<String, String>();
-		payDataMap.put("cardNumber", req.get("cardNumber"));
-		req.remove("cardNumber");
-		payDataMap.put("cardPasswd", req.get("cardPasswd"));
-		req.remove("cardPasswd");
-		
-		payDataMap.put("credentialName", (req.containsKey("credentialName") ? req.get("credentialName") : ""));
-		req.remove("credentialName");
-		
-		payDataMap.put("phoneNumber", (req.containsKey("phoneNumber") ? req.get("phoneNumber") : ""));
-		req.remove("phoneNumber");
-		
-		payDataMap.put("sms", (req.containsKey("sms") ? req.get("sms") : ""));
-		req.remove("sms");
-		
-		payDataMap.put("credentialType", (req.containsKey("credentialType") ? req.get("credentialType") : ""));
-		req.remove("credentialType");
-		
-		payDataMap.put("credentialNumber", (req.containsKey("credentialNumber") ? req.get("credentialNumber") : ""));
-		req.remove("credentialNumber");
-		
-		payDataMap.put("cardCvn2", (req.containsKey("cardCvn2") ? req.get("cardCvn2") : ""));
-		req.remove("cardCvn2");
-		
-		payDataMap.put("cardExpire", (req.containsKey("cardExpire") ? req.get("cardExpire") : ""));
-		req.remove("cardExpire");
+	    Map<String, String> merReservedMap = new HashMap<String, String>();
+	    merReservedMap.put("paydata", buildPayData(req));
+	    req.put("merReserved", UpmpService.buildReserved(merReservedMap));
 
-		Map<String, String> merReservedMap = new HashMap<String, String>();
-		merReservedMap.put("paydata", buildPayData(payDataMap));
-		req.put("merReserved", UpmpService.buildReserved(merReservedMap));// 机构保留域
-		
-        req.put("sysReserved", "中文");
-        req.put("version", UpmpConfig.VERSION);
-		
+	    req.put("sysReserved", "中文");
+	    req.put("version", UpmpConfig.VERSION);
 		String request = UpmpService.buildReq(req);
 		
 		StringEntity entity = new StringEntity(request);
@@ -1002,14 +972,60 @@ public class UPMPInsImpl extends UPMPAbstractImpl {
     /**
      * build PayData
      * @param req 
-     * @return payData
+     * @return modified req
      */
-    public static String buildPayData(Map<String, String> req) {
-        StringBuilder paydata = new StringBuilder();
-        paydata.append(UpmpCore.createLinkString(req, false, false));
-        PublicKey pubKey = RSAUtil.generateRSAPublicKey(UPMPConstant.instModulus, UPMPConstant.instPublicExponent);
-        byte[] encodeBytes = RSAUtil.encrypt(paydata.toString().getBytes(), pubKey);
-        String encodePaydata = BytesUtil.bytesToHex(encodeBytes);
-        return encodePaydata;
+    private String buildPayData(Map<String, String> req) {
+    	
+		Map<String, String> payDataMap = new HashMap<String, String>();
+		String cardNumber = req.get("cardNumber");
+		payDataMap.put("cardNumber", cardNumber);
+		req.remove("cardNumber");
+		
+		//new encrypt policy: encrypt Password, Cvn2 and Expire
+	    String cardPasswd = req.get("cardPasswd");
+	    if (StringUtils.isNotEmpty(cardPasswd)) {
+	      payDataMap.put("cardPasswd", SecurityUtil.encryptPin(cardPasswd, cardNumber, UPMPConstant.upmp_charset));
+	    }
+		req.remove("cardPasswd");
+		
+		String cardCvn2 = req.get("cardCvn2");
+	    if (StringUtils.isNotEmpty(cardCvn2)) {
+	        payDataMap.put("cardCvn2", SecurityUtil.encryptCvn2(cardCvn2, UPMPConstant.upmp_charset));
+	    }
+		req.remove("cardCvn2");
+		
+	    String cardExpire = req.get("cardExpire");
+	    if (StringUtils.isNotEmpty(cardExpire)) {
+	      payDataMap.put("cardExpire", SecurityUtil.encryptExpire(cardExpire, UPMPConstant.upmp_charset));
+	    }
+	    req.remove("cardExpire");
+		
+		payDataMap.put("credentialName", (req.containsKey("credentialName") ? req.get("credentialName") : ""));
+		req.remove("credentialName");
+		
+		payDataMap.put("phoneNumber", (req.containsKey("phoneNumber") ? req.get("phoneNumber") : ""));
+		req.remove("phoneNumber");
+		
+		payDataMap.put("credentialType", (req.containsKey("credentialType") ? req.get("credentialType") : ""));
+		req.remove("credentialType");
+		
+		payDataMap.put("credentialNumber", (req.containsKey("credentialNumber") ? req.get("credentialNumber") : ""));
+		req.remove("credentialNumber");
+		
+		String merReserved = UpmpCore.createLinkString(payDataMap, false, true);
+		Map<String, String> merReservedMap = new HashMap<String, String>();
+		merReservedMap.put("paydata", BytesUtil.base64Encode(merReserved.getBytes()));
+		
+		req.put("merReserved", UpmpService.buildReserved(merReservedMap));
+        req.put("sysReserved", "中文");
+        req.put("version", UpmpConfig.VERSION);
+
+        String paydata = UpmpCore.createLinkString(payDataMap, false, false);
+        try {
+          byte[] paydataBytes = SecurityUtil.base64Encode(paydata.toString().getBytes(UpmpConfig.CHARSET));
+          return new String(paydataBytes, UPMPConstant.upmp_charset); 
+        } catch (Exception e) {
+        }
+        return null;
     }
 }
