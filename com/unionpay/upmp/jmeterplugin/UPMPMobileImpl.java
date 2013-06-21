@@ -768,12 +768,12 @@ public class UPMPMobileImpl extends UPMPAbstractImpl {
 			byte[] keyBytes = RSAUtil.encrypt(key, pubKey);
 			String tmpKey = BytesUtil.bytesToHex(keyBytes);
 			post.setHeader("secret", tmpKey);
-			req.remove("initkey");
 			req.put("initkey", currentKey);
 		} else {
 			currentKey = req.get("secret");
 			post.setHeader("sid", req.get("sid"));
 		}
+		req.remove(UPMPConstant.upmp_mobile_message_type);
 		String request = UPMPMobileMessageBuilder.BuildMessage(req, type);
 		
 		StringEntity entity = new StringEntity(request, "UTF-8");
