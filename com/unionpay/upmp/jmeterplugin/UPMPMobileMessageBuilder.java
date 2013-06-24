@@ -16,43 +16,43 @@ public class UPMPMobileMessageBuilder {
 	static String KEY_PARAMS 			= "params";
 	static String KEY_TN 				= "tn";
 	static String KEY_SECRET 			= "secret";
-	static String KEY_USER 				= "user";
-	static String KEY_LOCAL 			= "local";
-	static String KEY_TERMINAL_TYPE 	= "terminal_type";
-	static String KEY_TERMINAL_VERSION 	= "terminal_version";
-	static String KEY_OS_NAME 			= "os_name";
-	static String KEY_OS_VERSION 		= "os_version";
-	static String KEY_CARD_TYPE 		= "card_tp";
-	static String KEY_BANK 				= "bank";
 	static String KEY_PAN 				= "pan";
-	static String KEY_MOBILE 			= "mobile";
+//	static String KEY_USER 				= "user";
+//	static String KEY_LOCAL 			= "local";
+//	static String KEY_TERMINAL_TYPE 	= "terminal_type";
+//	static String KEY_TERMINAL_VERSION 	= "terminal_version";
+//	static String KEY_OS_NAME 			= "os_name";
+//	static String KEY_OS_VERSION 		= "os_version";
+//	static String KEY_CARD_TYPE 		= "card_tp";
+//	static String KEY_BANK 				= "bank";
+//	static String KEY_MOBILE 			= "mobile";
 	
 	
 	public static String BuildMessage(Map<String, String> req, String type) {
 		RequestTemplate.init("RequestTemplate.conf");
 		String Message = "";
 		switch (type) {
-		case RequestTemplate.INIT 		: Message = buildInit(req);
-		case RequestTemplate.RULES 		: Message = buildRules(req);
-		case RequestTemplate.RULES2P1 	: Message = buildRules2p1(req);
-		case RequestTemplate.SMS 		: Message = buildSMS(req);
-		case RequestTemplate.UNBINDCARD : Message = buildUnbind(req);
-		case RequestTemplate.ENTRUST	: Message = buildEntrust(req);
-		case RequestTemplate.VERIFY		: Message = buildVerify(req);
-		case RequestTemplate.PAY		: Message = buildPay(req);
-		case RequestTemplate.PAYNEW		: Message = buildPayNew(req);
-		case RequestTemplate.FOLLOWRULES	: Message = buildFollowRules(req);
-		case RequestTemplate.ENTRUSTNEW		: Message = buildEntrustNew(req);
-		case RequestTemplate.BANKS			: Message = buildBanks(req);
-		case RequestTemplate.MOREBANKS		: Message = buildMoreBanks(req);
-		case RequestTemplate.OPENRULES		: Message = buildOpenRules(req);
-		case RequestTemplate.OPENUPGRADE	: Message = buildOpenUpgrade(req);
-		case RequestTemplate.QUERY			: Message = buildQuery(req);
-		case RequestTemplate.QUERYNEW		: Message = buildQueryNew(req);
-		case RequestTemplate.RULESNEW		: Message = buildRulesNew(req);
-		case RequestTemplate.SMSNEW			: Message = buildSMSNew(req);
-		case RequestTemplate.UNBINDCARDNEW	: Message = buildUnbindNew(req);
-		case RequestTemplate.VERIFYNEW		: Message = buildVerifyNew(req);
+		case RequestTemplate.INIT 			: Message = buildInit(req); break;
+		case RequestTemplate.RULES 			: Message = buildRules(req); break;
+		case RequestTemplate.RULES2P1 		: Message = buildRules2p1(req); break;
+		case RequestTemplate.SMS 			: Message = buildSMS(req); break;
+		case RequestTemplate.UNBINDCARD 	: Message = buildUnbind(req); break;
+		case RequestTemplate.ENTRUST		: Message = buildEntrust(req); break;
+		case RequestTemplate.VERIFY			: Message = buildVerify(req); break;
+		case RequestTemplate.PAY			: Message = buildPay(req); break;
+		case RequestTemplate.PAYNEW			: Message = buildPayNew(req); break;
+		case RequestTemplate.FOLLOWRULES	: Message = buildFollowRules(req); break;
+		case RequestTemplate.ENTRUSTNEW		: Message = buildEntrustNew(req); break;
+		case RequestTemplate.BANKS			: Message = buildBanks(req); break;
+		case RequestTemplate.MOREBANKS		: Message = buildMoreBanks(req); break;
+		case RequestTemplate.OPENRULES		: Message = buildOpenRules(req); break;
+		case RequestTemplate.OPENUPGRADE	: Message = buildOpenUpgrade(req); break;
+		case RequestTemplate.QUERY			: Message = buildQuery(req); break;
+		case RequestTemplate.QUERYNEW		: Message = buildQueryNew(req); break;
+		case RequestTemplate.RULESNEW		: Message = buildRulesNew(req); break;
+		case RequestTemplate.SMSNEW			: Message = buildSMSNew(req); break;
+		case RequestTemplate.UNBINDCARDNEW	: Message = buildUnbindNew(req); break;
+		case RequestTemplate.VERIFYNEW		: Message = buildVerifyNew(req); break;
 		}
 		return Message;
 	}

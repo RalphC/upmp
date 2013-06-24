@@ -772,6 +772,7 @@ public class UPMPMobileImpl extends UPMPAbstractImpl {
 		} else {
 			currentKey = req.get("secret");
 			post.setHeader("sid", req.get("sid"));
+			req.remove("sid");
 		}
 		req.remove(UPMPConstant.upmp_mobile_message_type);
 		String request = UPMPMobileMessageBuilder.BuildMessage(req, type);
