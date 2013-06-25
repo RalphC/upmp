@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -400,6 +401,18 @@ public class SecurityUtil {
 			return null;
 		}
 	}
+	
+	public static String encrypt(byte[] key, Map<String,Object> req) {
+		String request = JsonUtil.toJson(req).toString();
+		byte[] hex = null;
+		try {
+			hex = DESUtil.ecbEncrypt(key, request.getBytes(), 2);
+		} catch (GeneralSecurityException e) {
+			logger.error(e.getMessage());
+			logger.error(e.getStackTrace().toString());
+		}
+		return BytesUtil.bytesToHex(hex);
+	}	
 
 	static
 	{

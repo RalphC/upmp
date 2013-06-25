@@ -8,7 +8,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
-import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,10 +67,7 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 
-import com.unionpay.upmp.sdk.service.UpmpService;
-import com.unionpay.upmp.sdk.util.UpmpCore;
-import com.unionpay.upmp.util.BytesUtil;
-import com.unionpay.upmp.util.RSAUtil;
+import com.unionpay.upmp.util.SecurityUtil;
 import com.unionpay.upmp.util.UPMPConstant;
 
 public class UPMPMerImpl extends UPMPAbstractImpl {
@@ -747,7 +743,11 @@ public class UPMPMerImpl extends UPMPAbstractImpl {
 			req.put(parameterName, parameterValue);
 		}
 		
-		String request = UpmpService.buildReq(req);
+	    Map<String, String> filteredReq = SecurityUtil.paraFilter(req);
+	    String signature = SecurityUtil.buildSignature(filteredReq, req.get("securekey"));
+	    filteredReq.put("signature", signature);
+	    filteredReq.put("signMethod", UPMPConstant.upmp_sign_method);
+		String request = SecurityUtil.createLinkString(UPMPConstant.upmp_charset, filteredReq, false, true);
 		
 		StringEntity entity = new StringEntity(request);
 		post.setEntity(entity);
@@ -845,19 +845,5 @@ public class UPMPMerImpl extends UPMPAbstractImpl {
     protected void notifySSLContextWasReset() {
         log.debug("closeThreadLocalConnections called");
         closeThreadLocalConnections();
-    }
-    
-    /**
-     * build PayData
-     * @param req 
-     * @return payData
-     */
-    public static String buildPayData(Map<String, String> req) {
-        StringBuilder paydata = new StringBuilder();
-        paydata.append(UpmpCore.createLinkString(req, false, false));
-        PublicKey pubKey = RSAUtil.generateRSAPublicKey(UPMPConstant.instModulus, UPMPConstant.instPublicExponent);
-        byte[] encodeBytes = RSAUtil.encrypt(paydata.toString().getBytes(), pubKey);
-        String encodePaydata = BytesUtil.bytesToHex(encodeBytes);
-        return encodePaydata;
     }
 }
