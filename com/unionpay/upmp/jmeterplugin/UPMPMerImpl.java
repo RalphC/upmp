@@ -2,6 +2,7 @@ package com.unionpay.upmp.jmeterplugin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -31,6 +32,7 @@ import org.apache.jmeter.testelement.property.PropertyIterator;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 
+import com.unionpay.upmp.util.BytesUtil;
 import com.unionpay.upmp.util.SecurityUtil;
 import com.unionpay.upmp.util.UPMPConstant;
 
@@ -234,6 +236,14 @@ public class UPMPMerImpl extends UPMPAbstractImpl {
 		
 		String secureKey = req.get("securekey");
 		req.remove("securekey");
+		
+		// build merReserved for new merchant message
+		String merReserved = buildMerchantReserved(req);
+		if (merReserved != null) {
+			req.put("merReserved", merReserved);
+		}
+		
+		// impl of UpmpService.trade
 	    Map<String, String> filteredReq = SecurityUtil.paraFilter(req);
 	    String signature = SecurityUtil.buildSignature(filteredReq, secureKey);
 	    filteredReq.put("signature", signature);
@@ -249,7 +259,36 @@ public class UPMPMerImpl extends UPMPAbstractImpl {
 
     // TODO merge put and post methods as far as possible.
     // e.g. post checks for multipart form/files, and if not, invokes sendData(HttpEntityEnclosingRequestBase)
-
+    
+    private String buildMerchantReserved(Map<String, String> req) {
+    	Map<String, String> merReserved = new HashMap<String, String>();
+		if (req.containsKey("customerInfo")) {
+			String customerInfo = "{" + req.get("customerInfo") + "}";
+			try {
+				merReserved.put("customerInfo",  BytesUtil.base64Encode(customerInfo.getBytes(UPMPConstant.upmp_charset)));
+			} catch (UnsupportedEncodingException e) {
+				log.error(e.getMessage());
+			}
+		}
+		
+		if (req.containsKey("bindId")) {
+			merReserved.put("bindId",  (String) req.get("bindId"));
+		}
+		
+		if (req.containsKey("userId")) {
+			merReserved.put("userId",  (String) req.get("userId"));
+		}
+		
+		if (req.containsKey("userName")) {
+			merReserved.put("userName",  (String) req.get("userName"));
+		}
+		
+		if (!merReserved.isEmpty()) {
+			return SecurityUtil.buildReserved(merReserved);
+		} else {
+			return null;
+		}
+    }
 
 
 }

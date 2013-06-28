@@ -45,5 +45,7 @@ public final class UPMPConstant implements HTTPConstantsInterface{
     public static String upmp_mobile_message_type = "message-type";
     public static String DEFAULT_CLASSNAME = "UPMPMerImpl";
     public static String INIT_KEY = "1234";
+    
+    public static String request_template = "RequestTemplate.conf";
 
 }

@@ -40,9 +40,6 @@ import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 
 import com.unionpay.upmp.util.UPMPConstant;
-import com.unionpay.upmp.sdk.conf.UpmpConfig;
-import com.unionpay.upmp.sdk.service.UpmpService;
-import com.unionpay.upmp.sdk.util.UpmpCore;
 import com.unionpay.upmp.util.BytesUtil;
 import com.unionpay.upmp.util.SecurityUtil;
 
@@ -259,11 +256,14 @@ public class UPMPInsImpl extends UPMPAbstractImpl {
 		}
 	    Map<String, String> merReservedMap = new HashMap<String, String>();
 	    merReservedMap.put("paydata", buildPayData(req));
-	    req.put("merReserved", UpmpService.buildReserved(merReservedMap));
+	    req.put("merReserved", SecurityUtil.buildReserved(merReservedMap));
 
 	    req.put("sysReserved", "中文");
-	    req.put("version", UpmpConfig.VERSION);
-		String request = UpmpService.buildReq(req);
+	    req.put("version", "1.0.0");
+	    
+		String secureKey = req.get("securekey");
+		req.remove("securekey");
+		String request = SecurityUtil.buildReq(req, secureKey);
 		
 		StringEntity entity = new StringEntity(request);
 		post.setEntity(entity);
@@ -329,17 +329,17 @@ public class UPMPInsImpl extends UPMPAbstractImpl {
 			req.remove("credentialName");
 	    }
 		
-		String merReserved = UpmpCore.createLinkString(payDataMap, false, true);
+		String merReserved = SecurityUtil.createLinkString(UPMPConstant.upmp_charset, payDataMap, false, true);
 		Map<String, String> merReservedMap = new HashMap<String, String>();
 		merReservedMap.put("paydata", BytesUtil.base64Encode(merReserved.getBytes()));
 		
-		req.put("merReserved", UpmpService.buildReserved(merReservedMap));
+		req.put("merReserved", SecurityUtil.buildReserved(merReservedMap));
         req.put("sysReserved", "中文");
-        req.put("version", UpmpConfig.VERSION);
+        req.put("version", "1.0.0");
 
-        String paydata = UpmpCore.createLinkString(payDataMap, false, false);
+        String paydata = SecurityUtil.createLinkString(UPMPConstant.upmp_charset, payDataMap, false, false);
         try {
-          byte[] paydataBytes = SecurityUtil.base64Encode(paydata.toString().getBytes(UpmpConfig.CHARSET));
+          byte[] paydataBytes = SecurityUtil.base64Encode(paydata.toString().getBytes(UPMPConstant.upmp_charset));
           return new String(paydataBytes, UPMPConstant.upmp_charset); 
         } catch (Exception e) {
         	log.error(e.getMessage());

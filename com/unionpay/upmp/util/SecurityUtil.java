@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
@@ -24,9 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import com.unionpay.upmp.sdk.conf.UpmpConfig;
-import com.unionpay.upmp.sdk.util.UpmpCore;
 
 public class SecurityUtil {
 	private static final Logger logger = LoggingManager.getLoggerForClass();
@@ -131,12 +129,33 @@ public class SecurityUtil {
 		return signature.equals(generateSignature);
 	}
 
+	  public static String buildReq(Map<String, String> req, String secureKey)
+	  {
+	    Map<String, String> filteredReq = paraFilter(req);
+
+	    String signature = buildSignature(filteredReq, secureKey);
+
+	    filteredReq.put("signature", signature);
+	    filteredReq.put("signMethod", UPMPConstant.upmp_sign_method);
+
+	    return createLinkString(UPMPConstant.upmp_charset, filteredReq, false, true);
+	  }
+	
 	public static String buildSignature(Map<String, String> req, String securityKey)
 	{
 		String charset = (String)req.get("charset");
 		String prestr = createLinkString(charset, req, true, false);
 		prestr = prestr + "&" + md5(securityKey, charset);
 		return md5(prestr, charset);
+	}
+
+	public static String buildReserved(Map<String, String> req)
+	{
+		StringBuilder merReserved = new StringBuilder();
+		merReserved.append("{");
+		merReserved.append(createLinkString(UPMPConstant.upmp_charset, req, false, true));
+		merReserved.append("}");
+		return merReserved.toString();
 	}
 
 	public static String createLinkString(String charset, Map<String, String> para, boolean sort, boolean encode)
@@ -217,14 +236,14 @@ public class SecurityUtil {
 		return signature.equals(generateSignature);
 	}
 
-	public static boolean verifyRailwayResponse(String respString, Map<String, String> resp)
+	public static boolean verifyRailwayResponse(String respString, Map<String, String> resp, String secureKey)
 	{
 		boolean signIsValid = false;
 		if ((respString != null) && (!"".equals(respString)))
 		{
 			Map<String, String> para;
 			try {
-				para = UpmpCore.parseQString(respString);
+				para = parseQString(respString);
 			} catch (Exception e) {
 				logger.error(e.getMessage());
 				return signIsValid;
@@ -233,7 +252,7 @@ public class SecurityUtil {
 			String respSignature = (String)para.get("signature");
 
 			Map<String, String> filteredReq = paraRailwayFilter(para);
-			String signature = buildSignature(filteredReq, UpmpConfig.SECURITY_KEY);
+			String signature = buildSignature(filteredReq, secureKey);
 
 			if ((null != respSignature) && (respSignature.equals(signature))) signIsValid = true;
 			resp.putAll(para);
@@ -413,6 +432,56 @@ public class SecurityUtil {
 		}
 		return BytesUtil.bytesToHex(hex);
 	}	
+	
+	public static Map<String, String> parseQString(String str) throws UnsupportedEncodingException {
+		Map<String, String> map = new HashMap<String, String>();
+		int len = str.length();
+		StringBuilder temp = new StringBuilder();
+
+		String key = null;
+		boolean isKey = true;
+
+		for (int i = 0; i < len; i++) {
+			char curChar = str.charAt(i);
+
+			if (curChar == '&') {
+				putKeyValueToMap(temp, isKey, key, map);
+				temp.setLength(0);
+				isKey = true;
+			}
+			else if (isKey) {
+				if (curChar == '=') {
+					key = temp.toString();
+					temp.setLength(0);
+					isKey = false;
+				} else {
+					temp.append(curChar);
+				}
+			} else {
+				temp.append(curChar);
+			}
+
+		}
+		putKeyValueToMap(temp, isKey, key, map);
+		return map;
+	}
+
+
+	private static void putKeyValueToMap(StringBuilder temp, boolean isKey, String key, Map<String, String> map) throws UnsupportedEncodingException
+	{
+		if (isKey) {
+			key = temp.toString();
+			if (key.length() == 0) {
+				throw new RuntimeException("QString format illegal");
+			}
+			map.put(key, "");
+		} else {
+			if (key.length() == 0) {
+				throw new RuntimeException("QString format illegal");
+			}
+			map.put(key, URLDecoder.decode(temp.toString(), UPMPConstant.upmp_charset));
+		}
+	}
 
 	static
 	{

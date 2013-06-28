@@ -48,7 +48,7 @@ import org.apache.jorphan.reflect.Functor;
 import org.apache.log.Logger;
 
 import com.unionpay.upmp.jmeterplugin.UPMPSampleResult;
-import com.unionpay.upmp.sdk.util.UpmpCore;
+import com.unionpay.upmp.util.SecurityUtil;
 import com.unionpay.upmp.util.UPMPConstant;
 
 /**
@@ -200,7 +200,7 @@ public class RequestViewUPMP implements RequestView {
                 if (queryGet != null) {
                 	Set<Entry<String, String>> keys;
 					try {
-						keys = UpmpCore.parseQString(queryGet).entrySet();
+						keys = SecurityUtil.parseQString(queryGet).entrySet();
 	                    for (Entry<String, String> entry : keys) {
 	                        paramsModel.addRow(new RowResult(entry.getKey(),entry.getValue()));
 	                    }
